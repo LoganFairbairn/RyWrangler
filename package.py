@@ -1,0 +1,1 @@
+ADDON_PACKAGE = __package__
