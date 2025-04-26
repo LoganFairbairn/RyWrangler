@@ -78,7 +78,7 @@ class RYWRANGLER_PT_side_panel(bpy.types.Panel):
         row.operator("rywrangler.edit_image_externally")
 
 class RYWRANGLER_MT_pie_menu(bpy.types.Menu):
-    bl_label = "Shader Node Pie Menu"
+    bl_label = "RyWrangler"
     bl_idname = "rywrangler.pie_menu"
 
     def draw(self, context):
