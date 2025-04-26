@@ -3,60 +3,34 @@
 import bpy
 from bpy.types import Operator
 
-UI_Y_SCALE = 1.5
+UI_Y_SCALE = 1
 
-class RYWRANGLER_OT_open_menu(Operator):
-    bl_label = "Open RyWrangler Menu"
-    bl_idname = "rywrangler.open_menu"
-    bl_description = "Opens the RyWrangler menu"
+class RYWRANGLER_PT_side_panel(bpy.types.Panel):
+    bl_label = "Custom Shader Tools"
+    bl_idname = "rywrangler.shader_panel"
+    bl_space_type = 'NODE_EDITOR'
+    bl_region_type = 'UI'
+    bl_category = 'RyWrangler'
 
-    def execute(self, context):
-        return {'FINISHED'}
+    @classmethod
+    def poll(cls, context):
+        return context.space_data.tree_type == 'ShaderNodeTree'
 
-    # Opens the popup menu.
-    def invoke(self, context, event):
-        return context.window_manager.invoke_popup(self, width=300)
-
-    # Draws the properties in the popup.
     def draw(self, context):
         layout = self.layout
 
-        # Draw a grip icon so users can move the pop-up around if they desire.
-        layout.label(text="", icon='GRIP')
-
-        # Draw operators to help quickly adjust node connections.
-        row = layout.row()
-        row.scale_x = 2
-        row.scale_y = UI_Y_SCALE
-        row.operator("rywrangler.auto_link_nodes", text="", icon='LINKED')
-        row.operator("rywrangler.isolate_node", text="", icon='MATERIAL')
-
         # Draw operators to add material layers.
-        row = layout.row()
-        row.scale_y = UI_Y_SCALE
-        row.operator("rywrangler.add_material_layer", text="Material")
-        row.operator("rywrangler.add_paint_layer", text="Paint")
-        row = layout.row()
-        row.scale_y = UI_Y_SCALE
-        row.operator("rywrangler.add_image_layer", text="Image")
-        row.operator("rywrangler.add_decal_layer", text="Decal")
-        row = layout.row()
-        row.scale_y = UI_Y_SCALE
-        row.operator("rywrangler.add_triplanar_layer", text="Triplanar")
-        row.operator("rywrangler.add_triplanar_hexgrid_layer", text="Triplanar Hex Grid")
-
-        row = layout.row()
-        row.scale_y = UI_Y_SCALE
-        row.operator("rywrangler.add_grunge", text="Grunge")
-        row.operator("rywrangler.add_edge_wear", text="Edge Wear")
-
-        row = layout.row()
-        row.scale_y = UI_Y_SCALE
-        row.operator("rywrangler.add_blur", text="Blur")
-        row = layout.row()
-        row.scale_y = UI_Y_SCALE
-        row.operator("rywrangler.adjust_normal_intensity", text="Adjust Normal Intensity")
-        row.operator("rywrangler.mix_normal_maps", text="Mix Normal Maps")
+        layout.operator("rywrangler.add_material_layer", text="Material")
+        layout.operator("rywrangler.add_paint_layer", text="Paint")
+        layout.operator("rywrangler.add_image_layer", text="Image")
+        layout.operator("rywrangler.add_decal_layer", text="Decal")
+        layout.operator("rywrangler.add_triplanar_layer", text="Triplanar")
+        layout.operator("rywrangler.add_triplanar_hexgrid_layer", text="Triplanar Hex Grid")
+        layout.operator("rywrangler.add_grunge", text="Grunge")
+        layout.operator("rywrangler.add_edge_wear", text="Edge Wear")
+        layout.operator("rywrangler.add_blur", text="Blur")
+        layout.operator("rywrangler.adjust_normal_intensity", text="Adjust Normal Intensity")
+        layout.operator("rywrangler.mix_normal_maps", text="Mix Normal Maps")
 
         split = layout.split(factor=0.25)
         first_column = split.column()
@@ -103,8 +77,12 @@ class RYWRANGLER_OT_open_menu(Operator):
         row.scale_y = UI_Y_SCALE
         row.operator("rywrangler.edit_image_externally")
 
-        # Draw the add-on name and version.
-        layout.separator(type='LINE')
-        row = layout.row()
-        row.alignment = 'CENTER'
-        row.label(text="RyWrangler 1.0.0")
+class RYWRANGLER_MT_pie_menu(bpy.types.Menu):
+    bl_label = "Shader Node Pie Menu"
+    bl_idname = "rywrangler.pie_menu"
+
+    def draw(self, context):
+        layout = self.layout
+        pie = layout.menu_pie()
+        pie.operator("rywrangler.isolate_node", text="Isolate", icon='MATERIAL')
+        pie.operator("rywrangler.auto_link_nodes", text="Auto-Link", icon='LINKED')

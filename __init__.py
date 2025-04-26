@@ -12,10 +12,10 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import bpy
-from bpy.props import PointerProperty, EnumProperty
+from bpy.props import PointerProperty
 from .source.operators import RYWANGLER_OT_AutoLinkNodes, RYWRANGLER_OT_IsolateNode, RYWRANGLER_OT_AddMaterialLayer, RYWRANGLER_OT_AddPaintLayer, RYWRANGLER_OT_AddImageLayer, RYWRANGLER_OT_AddDecalLayer, RYWRANGLER_OT_AddPaintLayer, RYWRANGLER_OT_AddTriplanarLayer, RYWRANGLER_OT_AddTriplanarHexGridLayer, RYWRANGLER_OT_AddBlur, RYWRANGLER_OT_AddGrunge, RYWRANGLER_OT_AddEdgeWear, RYWRANGLER_OT_AdjustNormalIntensity, RYWRANGLER_OT_MixNormalMaps, RYWRANGLER_OT_edit_image_externally
 from .source.texture_settings import RYWRANGLER_texture_settings, RYWRANGLER_OT_set_raw_texture_folder, RYWRANGLER_OT_open_raw_texture_folder
-from .source.ui import RYWRANGLER_OT_open_menu
+from .source.ui import RYWRANGLER_PT_side_panel, RYWRANGLER_MT_pie_menu
 
 bl_info = {
     "name": "RyWrangler",
@@ -52,7 +52,8 @@ classes = (
     RYWRANGLER_OT_open_raw_texture_folder,
 
     # User Interface
-    RYWRANGLER_OT_open_menu
+    RYWRANGLER_PT_side_panel,
+    RYWRANGLER_MT_pie_menu
 )
 
 # Register classes with Blender.
@@ -65,8 +66,9 @@ def register():
     
     # Assign the pie menu to Shift + Q in the Shader Node Editor.
     wm = bpy.context.window_manager
-    km = wm.keyconfigs.addon.keymaps.new(name="Node Editor", space_type='NODE_EDITOR')
-    km.keymap_items.new("rywrangler.open_menu", "Q", "PRESS", shift=True)
+    km = wm.keyconfigs.addon.keymaps.new(name='Node Editor', space_type='NODE_EDITOR')
+    kmi = km.keymap_items.new('wm.call_menu_pie', 'Q', 'PRESS')
+    kmi.properties.name = "rywrangler.pie_menu"
 
 # Unregister classes and properties.
 def unregister():
