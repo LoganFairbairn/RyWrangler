@@ -2,8 +2,6 @@
 
 import bpy
 
-UI_Y_SCALE = 1
-
 class RYWRANGLER_PT_side_panel(bpy.types.Panel):
     bl_label = "Custom Shader Tools"
     bl_idname = "rywrangler.shader_panel"
@@ -73,7 +71,6 @@ class RYWRANGLER_PT_side_panel(bpy.types.Panel):
         row.operator("rywrangler.open_raw_texture_folder", text="", icon="FILE_FOLDER")
 
         row = layout.row()
-        row.scale_y = UI_Y_SCALE
         row.operator("rywrangler.edit_image_externally")
 
 class RYWRANGLER_MT_pie_menu(bpy.types.Menu):
