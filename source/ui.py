@@ -1,7 +1,6 @@
 # This file contains the user interface for this add-on.
 
 import bpy
-from bpy.types import Operator
 
 UI_Y_SCALE = 1
 
