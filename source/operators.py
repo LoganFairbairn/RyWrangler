@@ -84,103 +84,25 @@ MATERIAL_CHANNEL_ABBREVIATIONS = {
     "ao": 'AMBIENT_OCCLUSION'
 }
 
-class RYWANGLER_OT_AutoLinkNodes(bpy.types.Operator):
-    bl_idname = "rywrangler.auto_link_nodes"
-    bl_label = "Auto Link Nodes"
-    bl_description = "Attempts to link two nodes together automatically by referencing their node type, socket names, and socket types"
+class RYWRANGLER_OT_AddPaintLayer(bpy.types.Operator):
+    bl_idname = "rywrangler.add_paint_layer"
+    bl_label = "Add Paint Layer"
+    bl_description = "Adds an image texture node under the cursor, and a mix node below it if another exists"
     bl_options = {'REGISTER', 'UNDO'}
 
-    def execute(self, context):
-        # Get the active node tree (ensure we're in a node editor)
-        if not context.space_data or not context.space_data.node_tree:
-            self.report({'ERROR'}, "Can't link nodes, there's no active node tree.")
-            return {'CANCELLED'}
-        
-        node_tree = context.space_data.node_tree
-        selected_nodes = [node for node in node_tree.nodes if node.select]
-        
-        # Throw an error if the user selections less or more than two nodes.
-        if len(selected_nodes) != 2:
-            self.report({'ERROR'}, "Can't link nodes, you must select exactly two nodes for automatic linking.")
-            return {'CANCELLED'}
-        
-        node1, node2 = selected_nodes
-        
-        # Create a dictionary of output sockets by name for node1
-        outputs1 = {socket.name: socket for socket in node1.outputs}
-        inputs2 = {socket.name: socket for socket in node2.inputs if not socket.is_linked}
-        
-        # Link matching sockets
-        links = node_tree.links
-        link_count = 0
-        
-        for name, output_socket in outputs1.items():
-            if name in inputs2:
-                links.new(output_socket, inputs2[name])
-                link_count += 1
+    # Ensure the operator is only ran in the correct context.
+    @classmethod
+    def poll(cls, context):
+        return context.space_data.type == 'NODE_EDITOR' and context.space_data.tree_type == 'ShaderNodeTree'
 
-        if link_count == 0:
-            self.report({'WARNING'}, "No matching sockets found to link.")
-        else:
-            self.report({'INFO'}, f"Linked {link_count} matching sockets.")
-        
+    def execute(self, context):
+        add_group_node("Layer_UV")
+
+        # TODO: Add a new image texture into the color image texture node.
         return {'FINISHED'}
 
-class RYWRANGLER_OT_IsolateNode(Operator):
-    bl_idname = "rywrangler.isolate_node"
-    bl_label = "Isolate Node"
-    bl_options  = {'REGISTER', 'UNDO'}
-    bl_description = "Isolates the active node by connecting it to the material output node"
-    
-    def execute(self, context):
-        # Ensure we're in the node editor and using a material node tree
-        if not context.space_data or context.space_data.tree_type != 'ShaderNodeTree':
-            self.report({'WARNING'}, "Not in a Shader Node Tree")
-            return {'CANCELLED'}
-
-        mat = context.object.active_material
-        if not mat or not mat.node_tree:
-            self.report({'WARNING'}, "No active material with node tree found")
-            return {'CANCELLED'}
-        
-        nodes = mat.node_tree.nodes
-        links = mat.node_tree.links
-        
-        # Find the first Material Output node
-        output_node = next((node for node in nodes if node.type == 'OUTPUT_MATERIAL'), None)
-        if not output_node:
-            self.report({'WARNING'}, "No Material Output node found")
-            return {'CANCELLED'}
-        
-        # Get the selected node
-        selected_nodes = [node for node in nodes if node.select]
-        if not selected_nodes:
-            self.report({'WARNING'}, "No node selected")
-            return {'CANCELLED'}
-        
-        selected_node = selected_nodes[0]  # Use the first selected node
-        
-        # Determine the output socket (assuming first available output socket)
-        if not selected_node.outputs:
-            self.report({'WARNING'}, "Selected node has no output sockets")
-            return {'CANCELLED'}
-        
-        output_socket = selected_node.outputs[0]
-        
-        # Determine the input socket of the Material Output node
-        input_socket = output_node.inputs.get("Surface")
-        if not input_socket:
-            self.report({'WARNING'}, "Material Output node has no Surface input")
-            return {'CANCELLED'}
-        
-        # Create the link
-        links.new(output_socket, input_socket)
-        self.report({'INFO'}, "Connected node to Material Output")
-        
-        return {'FINISHED'}
-
-class RYWRANGLER_OT_AddMaterialLayer(Operator):
-    bl_idname = "rywrangler.add_material_layer"
+class RYWRANGLER_OT_AddUVLayer(Operator):
+    bl_idname = "rywrangler.add_uv_layer"
     bl_description = "Adds a shader node and a mix shader node"
     bl_label = "Add Material Layer"
     bl_options  = {'REGISTER', 'UNDO'}
@@ -198,114 +120,17 @@ class RYWRANGLER_OT_AddMaterialLayer(Operator):
                 context.space_data.tree_type == 'ShaderNodeTree')
 
     def execute(self, context):
-        # Get active node tree
-        node_tree = context.space_data.edit_tree
-        if not node_tree:
-            self.report({'WARNING'}, "No active node tree found")
-            return {'CANCELLED'}
-
-        # Determine the Blender shader node type
-        node_mapping = {
-            "PRINCIPLED_BSDF": "ShaderNodeBsdfPrincipled",
-            "DIFFUSE_BSDF": "ShaderNodeBsdfDiffuse",
-            "EMISSION": "ShaderNodeEmission",
-            "GROUP_NODE": "ShaderNodeGroup"
-        }
-
-        node_type = node_mapping.get(self.node_type)
-        if not node_type:
-            self.report({'WARNING'}, "Invalid shader node type")
-            return {'CANCELLED'}
-
-        # Add the node
-        shader_node = node_tree.nodes.new(type=node_type)
-
-        # Position node under cursor
-        cursor_location = context.space_data.cursor_location
-        shader_node.location = (cursor_location.x, cursor_location.y)
-
-        self.report({'INFO'}, f"Added {self.node_type} Node")
-        return {'FINISHED'}
-
-class RYWRANGLER_OT_AddPaintLayer(bpy.types.Operator):
-    bl_idname = "rywrangler.add_paint_layer"
-    bl_label = "Add Paint Layer"
-    bl_description = "Adds an image texture node under the cursor, and a mix node below it if another exists"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    # Ensure the operator is only ran in the correct context.
-    @classmethod
-    def poll(cls, context):
-        return context.space_data.type == 'NODE_EDITOR' and context.space_data.tree_type == 'ShaderNodeTree'
-
-    def execute(self, context):
-        obj = context.object
-        if not obj or not obj.active_material:
-            self.report({'WARNING'}, "No active material found on the object")
-            return {'CANCELLED'}
-        
-        mat = obj.active_material
-        if not mat.use_nodes:
-            mat.use_nodes = True
-        
-        nodes = mat.node_tree.nodes
-        links = mat.node_tree.links
-        
-        # Create a new image
-        image = bpy.data.images.new(name="New_Paint_Layer", width=1024, height=1024, alpha=True)
-
-        # Create a new Image Texture Node
-        img_tex_node = nodes.new(type='ShaderNodeTexImage')
-        img_tex_node.image = image
-
-        # Get cursor position in the Shader Editor
-        space = context.space_data
-        if space.type == 'NODE_EDITOR':
-            cursor_x, cursor_y = space.cursor_location
-            img_tex_node.location = (cursor_x - 150, cursor_y)
-        else:
-            img_tex_node.location = (0, 0)
-
-        # Find an existing image texture node
-        existing_image_nodes = [node for node in nodes if node.type == 'TEX_IMAGE' and node != img_tex_node]
-
-        if existing_image_nodes:
-            # Create a MixRGB node below the new Image Texture node
-            mix_node = nodes.new(type='ShaderNodeMixRGB')
-            mix_node.blend_type = 'MIX'
-            
-            # Set MixRGB node dimensions to match Image Texture node
-            mix_node.width = img_tex_node.width  
-
-            # Position MixRGB node below Image Texture node with some spacing
-            spacing = 200
-            mix_node.location = (img_tex_node.location.x, img_tex_node.location.y - spacing - img_tex_node.height)
-
-            # Link the new Image Texture node to the second input (Color2) of the Mix Node
-            links.new(img_tex_node.outputs['Color'], mix_node.inputs[2])
-            
-            # If the Image Texture node has Alpha, connect it to the Mix Factor
-            if 'Alpha' in img_tex_node.outputs:
-                links.new(img_tex_node.outputs['Alpha'], mix_node.inputs['Fac'])
-        
-        return {'FINISHED'}
-
-class RYWRANGLER_OT_AddImageLayer(Operator):
-    bl_idname = "rywrangler.add_image_layer"
-    bl_label = "Add Image Layer"
-    bl_description = "Adds an empty image texture node and a mix color node"
-    bl_options  = {'REGISTER', 'UNDO'}
-    
-    def execute(self, context):
+        add_group_node("Layer_UV")
         return {'FINISHED'}
 
 class RYWRANGLER_OT_AddDecalLayer(Operator):
     bl_idname = "rywrangler.add_decal_layer"
     bl_label = "Add Decal Layer"
-    bl_description = "Adds a node setup that projects the specified texture using the coordinates of an empty object. This is designed for adding non-destructive sticker like layers"
+    bl_description = "Adds a node setup that projects the specified texture using the coordinates of an empty object. This is designed for adding non-destructive sticker style layers"
     bl_options  = {'REGISTER', 'UNDO'}
     
     def execute(self, context):
+        add_group_node("Layer_Decal")
         return {'FINISHED'}
 
 class RYWRANGLER_OT_AddTriplanarLayer(Operator):
@@ -315,25 +140,7 @@ class RYWRANGLER_OT_AddTriplanarLayer(Operator):
     bl_options  = {'REGISTER', 'UNDO'}
     
     def execute(self, context):
-        return {'FINISHED'}
-
-class RYWRANGLER_OT_AddTriplanarHexGridLayer(Operator):
-    bl_idname = "rywrangler.add_triplanar_hexgrid_layer"
-    bl_label = "Add Triplanar Hex Grid Layer"
-    bl_description = "Adds a node setup that projects specified textures onto the X, Y and Z axis of the object in a hexagon grid pattern that hides texture repetition and blendings projection seams"
-    bl_options  = {'REGISTER', 'UNDO'}
-    
-    def execute(self, context):
-        return {'FINISHED'}
-
-class RYWRANGLER_OT_AddBlur(Operator):
-    bl_idname = "rywrangler.add_blur"
-    bl_label = "Add Blur"
-    bl_description = "Adds nodes to help setup blur effects."
-    bl_options  = {'REGISTER', 'UNDO'}
-    
-    def execute(self, context):
-        add_group_node("Blur")
+        add_group_node("Layer_Triplanar")
         return {'FINISHED'}
 
 class RYWRANGLER_OT_AddGrunge(Operator):
@@ -343,7 +150,7 @@ class RYWRANGLER_OT_AddGrunge(Operator):
     bl_options  = {'REGISTER', 'UNDO'}
     
     def execute(self, context):
-        add_group_node("Grunge")
+        add_group_node("Mask_Grunge")
         return {'FINISHED'}
     
 class RYWRANGLER_OT_AddEdgeWear(Operator):
@@ -353,27 +160,7 @@ class RYWRANGLER_OT_AddEdgeWear(Operator):
     bl_options  = {'REGISTER', 'UNDO'}
     
     def execute(self, context):
-        add_group_node("EdgeWear")
-        return {'FINISHED'}
-
-class RYWRANGLER_OT_AdjustNormalIntensity(Operator):
-    bl_idname = "rywrangler.adjust_normal_intensity"
-    bl_label = "Adjust Normal Intensity"
-    bl_description = "Adds a group node designed for adding edge wear to objects"
-    bl_options  = {'REGISTER', 'UNDO'}
-    
-    def execute(self, context):
-        add_group_node("AdjustNormalIntensity")
-        return {'FINISHED'}
-
-class RYWRANGLER_OT_MixNormalMaps(Operator):
-    bl_idname = "rywrangler.mix_normal_maps"
-    bl_label = "Mix Normal Maps"
-    bl_description = "Adds a group node designed to mix normal maps together"
-    bl_options  = {'REGISTER', 'UNDO'}
-    
-    def execute(self, context):
-        add_group_node("MixNormalMaps")
+        add_group_node("Mask_EdgeWear")
         return {'FINISHED'}
 
 class RYWRANGLER_OT_import_texture_set(Operator, ImportHelper):
@@ -645,6 +432,101 @@ class RYWRANGLER_OT_edit_image_externally(Operator):
     def execute(self, context):
         return {'FINISHED'}
 
+class RYWANGLER_OT_AutoLinkNodes(bpy.types.Operator):
+    bl_idname = "rywrangler.auto_link_nodes"
+    bl_label = "Auto Link Nodes"
+    bl_description = "Attempts to link two nodes together automatically by referencing their node type, socket names, and socket types"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        # Get the active node tree (ensure we're in a node editor)
+        if not context.space_data or not context.space_data.node_tree:
+            self.report({'ERROR'}, "Can't link nodes, there's no active node tree.")
+            return {'CANCELLED'}
+        
+        node_tree = context.space_data.node_tree
+        selected_nodes = [node for node in node_tree.nodes if node.select]
+        
+        # Throw an error if the user selections less or more than two nodes.
+        if len(selected_nodes) != 2:
+            self.report({'ERROR'}, "Can't link nodes, you must select exactly two nodes for automatic linking.")
+            return {'CANCELLED'}
+        
+        node1, node2 = selected_nodes
+        
+        # Create a dictionary of output sockets by name for node1
+        outputs1 = {socket.name: socket for socket in node1.outputs}
+        inputs2 = {socket.name: socket for socket in node2.inputs if not socket.is_linked}
+        
+        # Link matching sockets
+        links = node_tree.links
+        link_count = 0
+        
+        for name, output_socket in outputs1.items():
+            if name in inputs2:
+                links.new(output_socket, inputs2[name])
+                link_count += 1
+
+        if link_count == 0:
+            self.report({'WARNING'}, "No matching sockets found to link.")
+        else:
+            self.report({'INFO'}, f"Linked {link_count} matching sockets.")
+        
+        return {'FINISHED'}
+
+class RYWRANGLER_OT_IsolateNode(Operator):
+    bl_idname = "rywrangler.isolate_node"
+    bl_label = "Isolate Node"
+    bl_options  = {'REGISTER', 'UNDO'}
+    bl_description = "Isolates the active node by connecting it to the material output node"
+    
+    def execute(self, context):
+        # Ensure we're in the node editor and using a material node tree
+        if not context.space_data or context.space_data.tree_type != 'ShaderNodeTree':
+            self.report({'WARNING'}, "Not in a Shader Node Tree")
+            return {'CANCELLED'}
+
+        mat = context.object.active_material
+        if not mat or not mat.node_tree:
+            self.report({'WARNING'}, "No active material with node tree found")
+            return {'CANCELLED'}
+        
+        nodes = mat.node_tree.nodes
+        links = mat.node_tree.links
+        
+        # Find the first Material Output node
+        output_node = next((node for node in nodes if node.type == 'OUTPUT_MATERIAL'), None)
+        if not output_node:
+            self.report({'WARNING'}, "No Material Output node found")
+            return {'CANCELLED'}
+        
+        # Get the selected node
+        selected_nodes = [node for node in nodes if node.select]
+        if not selected_nodes:
+            self.report({'WARNING'}, "No node selected")
+            return {'CANCELLED'}
+        
+        selected_node = selected_nodes[0]  # Use the first selected node
+        
+        # Determine the output socket (assuming first available output socket)
+        if not selected_node.outputs:
+            self.report({'WARNING'}, "Selected node has no output sockets")
+            return {'CANCELLED'}
+        
+        output_socket = selected_node.outputs[0]
+        
+        # Determine the input socket of the Material Output node
+        input_socket = output_node.inputs.get("Surface")
+        if not input_socket:
+            self.report({'WARNING'}, "Material Output node has no Surface input")
+            return {'CANCELLED'}
+        
+        # Create the link
+        links.new(output_socket, input_socket)
+        self.report({'INFO'}, "Connected node to Material Output")
+        
+        return {'FINISHED'}
+
 def get_blend_assets_path():
     '''Returns the path to the blend file where assets are stored for this add-on.'''
     blend_assets_path = str(Path(resource_path('USER')) / "scripts/addons" / ADDON_PACKAGE / "assets" / "Assets.blend")
@@ -712,10 +594,11 @@ def set_snapping_mode(snapping_mode, snap_on=True):
 
 def add_group_node(group_node_name):
     '''Appends a group node from the asset blend file and adds it to the active material.'''
+
     # Get the active node tree (e.g., material node tree).
     node_tree = bpy.context.space_data.edit_tree
     if not node_tree:
-        return {'CANCELLED'}
+        return
 
     # Create a new empty node group.
     group_tree = append_group_node(group_node_name)
@@ -724,6 +607,5 @@ def add_group_node(group_node_name):
     group_node = node_tree.nodes.new('ShaderNodeGroup')
     group_node.node_tree = group_tree
 
-    # Get cursor position and center node under it.
-    cursor_location = bpy.context.space_data.cursor_location
-    group_node.location = (cursor_location.x - group_node.width / 2, cursor_location.y)
+    # Set default location near origin (roughly center of screen view in many cases)
+    group_node.location = (0 - group_node.width / 2, 0)

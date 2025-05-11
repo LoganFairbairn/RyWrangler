@@ -3,8 +3,8 @@
 import bpy
 
 class RYWRANGLER_PT_side_panel(bpy.types.Panel):
-    bl_label = "Custom Shader Tools"
-    bl_idname = "rywrangler.shader_panel"
+    bl_label = "RyWrangler"
+    bl_idname = "RYWRANGLER_PT_shader_panel"
     bl_space_type = 'NODE_EDITOR'
     bl_region_type = 'UI'
     bl_category = 'RyWrangler'
@@ -17,17 +17,12 @@ class RYWRANGLER_PT_side_panel(bpy.types.Panel):
         layout = self.layout
 
         # Draw operators to add material layers.
-        layout.operator("rywrangler.add_material_layer", text="Material")
         layout.operator("rywrangler.add_paint_layer", text="Paint")
-        layout.operator("rywrangler.add_image_layer", text="Image")
+        layout.operator("rywrangler.add_uv_layer", text="Material")
         layout.operator("rywrangler.add_decal_layer", text="Decal")
         layout.operator("rywrangler.add_triplanar_layer", text="Triplanar")
-        layout.operator("rywrangler.add_triplanar_hexgrid_layer", text="Triplanar Hex Grid")
         layout.operator("rywrangler.add_grunge", text="Grunge")
         layout.operator("rywrangler.add_edge_wear", text="Edge Wear")
-        layout.operator("rywrangler.add_blur", text="Blur")
-        layout.operator("rywrangler.adjust_normal_intensity", text="Adjust Normal Intensity")
-        layout.operator("rywrangler.mix_normal_maps", text="Mix Normal Maps")
 
         split = layout.split(factor=0.25)
         first_column = split.column()
@@ -73,12 +68,3 @@ class RYWRANGLER_PT_side_panel(bpy.types.Panel):
         row = layout.row()
         row.operator("rywrangler.edit_image_externally")
 
-class RYWRANGLER_MT_pie_menu(bpy.types.Menu):
-    bl_label = "RyWrangler"
-    bl_idname = "rywrangler.pie_menu"
-
-    def draw(self, context):
-        layout = self.layout
-        pie = layout.menu_pie()
-        pie.operator("rywrangler.isolate_node", text="Isolate", icon='MATERIAL')
-        pie.operator("rywrangler.auto_link_nodes", text="Auto-Link", icon='LINKED')

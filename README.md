@@ -2,7 +2,7 @@
 
 <p style="text-align:center; font-weight:bold;">CURRENTLY IN TESTING</p>
 
-RyWrangler is an experimental Blender add-on that adds a quick access panel to the material node editor designed to help speed up complex and layered material creation in Blender.
+RyWrangler is a minimalist Blender add-on that adds a quick access panel to the material node editor designed to help speed up complex and layered material creation in Blender.
 
 Cheers!
 
@@ -13,8 +13,6 @@ Cheers!
 ![macOS](https://img.shields.io/badge/-OSX-grey?logo=apple)
 
 ## Features
-
-- 
 - Effect nodes (grunge, edge wear)
 - Nodes to assist blurring.
 

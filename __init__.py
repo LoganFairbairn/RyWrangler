@@ -13,9 +13,9 @@
 
 import bpy
 from bpy.props import PointerProperty
-from .source.operators import RYWANGLER_OT_AutoLinkNodes, RYWRANGLER_OT_IsolateNode, RYWRANGLER_OT_AddMaterialLayer, RYWRANGLER_OT_AddPaintLayer, RYWRANGLER_OT_AddImageLayer, RYWRANGLER_OT_AddDecalLayer, RYWRANGLER_OT_AddPaintLayer, RYWRANGLER_OT_AddTriplanarLayer, RYWRANGLER_OT_AddTriplanarHexGridLayer, RYWRANGLER_OT_AddBlur, RYWRANGLER_OT_AddGrunge, RYWRANGLER_OT_AddEdgeWear, RYWRANGLER_OT_AdjustNormalIntensity, RYWRANGLER_OT_MixNormalMaps, RYWRANGLER_OT_edit_image_externally
+from .source.operators import RYWANGLER_OT_AutoLinkNodes, RYWRANGLER_OT_IsolateNode, RYWRANGLER_OT_AddUVLayer, RYWRANGLER_OT_AddPaintLayer, RYWRANGLER_OT_AddDecalLayer, RYWRANGLER_OT_AddPaintLayer, RYWRANGLER_OT_AddTriplanarLayer, RYWRANGLER_OT_AddGrunge, RYWRANGLER_OT_AddEdgeWear, RYWRANGLER_OT_edit_image_externally
 from .source.texture_settings import RYWRANGLER_texture_settings, RYWRANGLER_OT_set_raw_texture_folder, RYWRANGLER_OT_open_raw_texture_folder
-from .source.ui import RYWRANGLER_PT_side_panel, RYWRANGLER_MT_pie_menu
+from .source.ui import RYWRANGLER_PT_side_panel
 
 bl_info = {
     "name": "RyWrangler",
@@ -24,7 +24,6 @@ bl_info = {
     "blender": (4, 3, 2),
     "version": (1, 0, 0),
     "location": "Node Editor > Shift + Q",
-    "warning": "",
     "category": "Material",
 }
 
@@ -33,17 +32,12 @@ classes = (
     # Operators
     RYWANGLER_OT_AutoLinkNodes,
     RYWRANGLER_OT_IsolateNode,
-    RYWRANGLER_OT_AddMaterialLayer,
+    RYWRANGLER_OT_AddUVLayer,
     RYWRANGLER_OT_AddPaintLayer,
-    RYWRANGLER_OT_AddImageLayer,
     RYWRANGLER_OT_AddDecalLayer,
     RYWRANGLER_OT_AddTriplanarLayer,
-    RYWRANGLER_OT_AddTriplanarHexGridLayer,
-    RYWRANGLER_OT_AddBlur,
     RYWRANGLER_OT_AddGrunge,
     RYWRANGLER_OT_AddEdgeWear,
-    RYWRANGLER_OT_AdjustNormalIntensity,
-    RYWRANGLER_OT_MixNormalMaps,
     RYWRANGLER_OT_edit_image_externally,
 
     # Texture Settings
@@ -52,8 +46,7 @@ classes = (
     RYWRANGLER_OT_open_raw_texture_folder,
 
     # User Interface
-    RYWRANGLER_PT_side_panel,
-    RYWRANGLER_MT_pie_menu
+    RYWRANGLER_PT_side_panel
 )
 
 # Register classes with Blender.
@@ -63,12 +56,6 @@ def register():
 
     bpy.types.Scene.rywrangler_shader_node = PointerProperty(type=bpy.types.NodeTree)
     bpy.types.Scene.rywrangler_texture_settings = PointerProperty(type=RYWRANGLER_texture_settings)
-    
-    # Assign the pie menu to Shift + Q in the Shader Node Editor.
-    wm = bpy.context.window_manager
-    km = wm.keyconfigs.addon.keymaps.new(name='Node Editor', space_type='NODE_EDITOR')
-    kmi = km.keymap_items.new('wm.call_menu_pie', 'Q', 'PRESS')
-    kmi.properties.name = "rywrangler.pie_menu"
 
 # Unregister classes and properties.
 def unregister():

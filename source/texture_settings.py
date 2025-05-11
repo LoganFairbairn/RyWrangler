@@ -158,6 +158,5 @@ class RYWRANGLER_OT_open_raw_texture_folder(Operator):
         return context.active_object
 
     def execute(self, context):
-        #raw_texture_folder_path = bau.get_texture_folder_path(folder='RAW_TEXTURES')
-        #bau.open_folder(raw_texture_folder_path, self)
+        raw_textures_folder = context.scene.RYWRANGLER_raw_textures_folder
         return {'FINISHED'}
