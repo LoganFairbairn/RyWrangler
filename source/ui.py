@@ -58,14 +58,6 @@ class RYWRANGLER_PT_side_panel(bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
 
-        # Draw operators to add material layers.
-        layout.operator("rywrangler.add_paint_layer", text="Paint")
-        layout.operator("rywrangler.add_uv_layer", text="Material")
-        layout.operator("rywrangler.add_decal_layer", text="Decal")
-        layout.operator("rywrangler.add_triplanar_layer", text="Triplanar")
-        layout.operator("rywrangler.add_grunge", text="Grunge")
-        layout.operator("rywrangler.add_edge_wear", text="Edge Wear")
-
         split = layout.split(factor=0.25)
         first_column = split.column()
         second_column = split.column()
@@ -106,7 +98,3 @@ class RYWRANGLER_PT_side_panel(bpy.types.Panel):
         row.prop(texture_settings, "raw_image_folder", text="")
         row.operator("rywrangler.set_raw_texture_folder", text="", icon="FOLDER_REDIRECT")
         row.operator("rywrangler.open_raw_texture_folder", text="", icon="FILE_FOLDER")
-
-        row = layout.row()
-        row.operator("rywrangler.edit_image_externally")
-
