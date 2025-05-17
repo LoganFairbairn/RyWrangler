@@ -12,7 +12,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import bpy
-from bpy.props import PointerProperty
+from bpy.props import PointerProperty, FloatVectorProperty
 from .source.operators import RYWANGLER_OT_AutoLinkNodes, RYWRANGLER_OT_IsolateNode, RYWRANGLER_OT_AddUVLayer, RYWRANGLER_OT_AddPaintLayer, RYWRANGLER_OT_AddDecalLayer, RYWRANGLER_OT_AddPaintLayer, RYWRANGLER_OT_AddTriplanarLayer, RYWRANGLER_OT_AddGrunge, RYWRANGLER_OT_AddEdgeWear, RYWRANGLER_OT_edit_image_externally, RYWRANGLER_OT_import_texture_set
 from .source.texture_settings import RYWRANGLER_texture_settings, RYWRANGLER_OT_set_raw_texture_folder, RYWRANGLER_OT_open_raw_texture_folder
 from .source.ui import RYWRANGLER_MT_pie_menu, RYWRANGLER_OT_open_pie_menu, RYWRANGLER_PT_side_panel
@@ -61,6 +61,12 @@ def register():
 
     bpy.types.Scene.rywrangler_shader_node = PointerProperty(type=bpy.types.NodeTree)
     bpy.types.Scene.rywrangler_texture_settings = PointerProperty(type=RYWRANGLER_texture_settings)
+    bpy.types.Scene.rywrangler_pie_menu_location = FloatVectorProperty(
+        name="Last Node Cursor Position",
+        size=2,
+        subtype='XYZ',
+        default=(0.0, 0.0)
+    )
 
     # Keymap: Shift + Q in Shader Editor
     wm = bpy.context.window_manager

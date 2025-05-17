@@ -610,6 +610,9 @@ def set_snapping_mode(snapping_mode, snap_on=True):
 
 def add_group_node(group_node_name):
     '''Appends a group node from the asset blend file and adds it to the active material.'''
+    pie_menu_location = bpy.context.scene.rywrangler_pie_menu_location
+
+    # If there is no active node tree, abort.
     active_node_tree = bpy.context.space_data.edit_tree
     if not active_node_tree:
         return
@@ -623,4 +626,4 @@ def add_group_node(group_node_name):
     group_node.node_tree = node_tree
     group_node.name = node_tree.name
     group_node.width = 200.0
-    
+    group_node.location = (pie_menu_location[0] - 100, pie_menu_location[1] + group_node.height)

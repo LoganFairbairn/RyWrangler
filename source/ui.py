@@ -34,8 +34,21 @@ class RYWRANGLER_OT_open_pie_menu(bpy.types.Operator):
     bl_idname = "wm.call_custom_pie"
     bl_label = "Call Shader Editor Pie Menu"
 
-    def execute(self, context):
+    def invoke(self, context, event):
+        global last_cursor_position
+
+        if context.space_data.type != 'NODE_EDITOR':
+            self.report({'WARNING'}, "Not in Node Editor")
+            return {'CANCELLED'}
+
+        # Convert mouse position (in region coordinates) to node editor view space
+        view2d = context.region.view2d
+        node_x, node_y = view2d.region_to_view(event.mouse_region_x, event.mouse_region_y)
+        context.scene.rywrangler_pie_menu_location = (node_x, node_y)
+
+        # Open the pie menu
         bpy.ops.wm.call_menu_pie(name=RYWRANGLER_MT_pie_menu.bl_idname)
+
         return {'FINISHED'}
 
 class RYWRANGLER_PT_side_panel(bpy.types.Panel):
