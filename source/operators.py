@@ -108,7 +108,7 @@ class RYWRANGLER_OT_AddPaintLayer(bpy.types.Operator):
 class RYWRANGLER_OT_AddUVLayer(Operator):
     bl_idname = "rywrangler.add_uv_layer"
     bl_description = "Adds a shader node and a mix shader node"
-    bl_label = "Add Material Layer"
+    bl_label = "Add UV Layer"
     bl_options  = {'REGISTER', 'UNDO'}
 
     node_type: bpy.props.EnumProperty(
