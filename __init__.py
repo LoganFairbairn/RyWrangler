@@ -13,9 +13,9 @@
 
 import bpy
 from bpy.props import PointerProperty
-from .source.operators import RYWANGLER_OT_AutoLinkNodes, RYWRANGLER_OT_IsolateNode, RYWRANGLER_OT_AddUVLayer, RYWRANGLER_OT_AddPaintLayer, RYWRANGLER_OT_AddDecalLayer, RYWRANGLER_OT_AddPaintLayer, RYWRANGLER_OT_AddTriplanarLayer, RYWRANGLER_OT_AddGrunge, RYWRANGLER_OT_AddEdgeWear, RYWRANGLER_OT_edit_image_externally
+from .source.operators import RYWANGLER_OT_AutoLinkNodes, RYWRANGLER_OT_IsolateNode, RYWRANGLER_OT_AddUVLayer, RYWRANGLER_OT_AddPaintLayer, RYWRANGLER_OT_AddDecalLayer, RYWRANGLER_OT_AddPaintLayer, RYWRANGLER_OT_AddTriplanarLayer, RYWRANGLER_OT_AddGrunge, RYWRANGLER_OT_AddEdgeWear, RYWRANGLER_OT_edit_image_externally, RYWRANGLER_OT_import_texture_set
 from .source.texture_settings import RYWRANGLER_texture_settings, RYWRANGLER_OT_set_raw_texture_folder, RYWRANGLER_OT_open_raw_texture_folder
-from .source.ui import RYWRANGLER_PT_side_panel
+from .source.ui import RYWRANGLER_MT_pie_menu, RYWRANGLER_MT_layer_menu, RYWRANGLER_MT_mask_menu, RYWRANGLER_OT_open_pie_menu, RYWRANGLER_PT_side_panel
 
 bl_info = {
     "name": "RyWrangler",
@@ -39,6 +39,7 @@ classes = (
     RYWRANGLER_OT_AddGrunge,
     RYWRANGLER_OT_AddEdgeWear,
     RYWRANGLER_OT_edit_image_externally,
+    RYWRANGLER_OT_import_texture_set,
 
     # Texture Settings
     RYWRANGLER_texture_settings,
@@ -46,8 +47,14 @@ classes = (
     RYWRANGLER_OT_open_raw_texture_folder,
 
     # User Interface
+    RYWRANGLER_MT_pie_menu,
+    RYWRANGLER_MT_layer_menu,
+    RYWRANGLER_MT_mask_menu,
+    RYWRANGLER_OT_open_pie_menu,
     RYWRANGLER_PT_side_panel
 )
+
+addon_keymaps = []
 
 # Register classes with Blender.
 def register():
@@ -57,8 +64,20 @@ def register():
     bpy.types.Scene.rywrangler_shader_node = PointerProperty(type=bpy.types.NodeTree)
     bpy.types.Scene.rywrangler_texture_settings = PointerProperty(type=RYWRANGLER_texture_settings)
 
+    # Keymap: Shift + Q in Shader Editor
+    wm = bpy.context.window_manager
+    kc = wm.keyconfigs.addon
+    if kc:
+        km = kc.keymaps.new(name="Node Editor", space_type="NODE_EDITOR")
+        kmi = km.keymap_items.new("wm.call_custom_pie", type='Q', value='PRESS', shift=True)
+        addon_keymaps.append((km, kmi))
+
 # Unregister classes and properties.
 def unregister():
+    for km, kmi in addon_keymaps:
+        km.keymap_items.remove(kmi)
+    addon_keymaps.clear()
+
     for cls in classes:
         bpy.utils.unregister_class(cls)
     

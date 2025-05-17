@@ -182,7 +182,7 @@ class RYWRANGLER_OT_import_texture_set(Operator, ImportHelper):
     # Disable this operator when the material isn't made with this add-on.
     @ classmethod
     def poll(cls, context):
-        return bau.verify_addon_active_material(context)
+        return True
 
     def execute(self, context):
         def split_filename_by_components(filename):
@@ -423,15 +423,6 @@ class RYWRANGLER_OT_import_texture_set(Operator, ImportHelper):
 
         return {'FINISHED'}
 
-class RYWRANGLER_OT_edit_image_externally(Operator):
-    bl_idname = "rywrangler.edit_image_externally"
-    bl_label = "Edit Image Externally"
-    bl_options = {'REGISTER', 'UNDO'}
-    bl_description = "Opens the selected image in the 2D image editor defined in the users Blender preferences"
-
-    def execute(self, context):
-        return {'FINISHED'}
-
 class RYWANGLER_OT_AutoLinkNodes(bpy.types.Operator):
     bl_idname = "rywrangler.auto_link_nodes"
     bl_label = "Auto Link Nodes"
@@ -525,6 +516,15 @@ class RYWRANGLER_OT_IsolateNode(Operator):
         links.new(output_socket, input_socket)
         self.report({'INFO'}, "Connected node to Material Output")
         
+        return {'FINISHED'}
+
+class RYWRANGLER_OT_edit_image_externally(Operator):
+    bl_idname = "rywrangler.edit_image_externally"
+    bl_label = "Edit Image Externally"
+    bl_options = {'REGISTER', 'UNDO'}
+    bl_description = "Opens the selected image in the 2D image editor defined in the users Blender preferences"
+
+    def execute(self, context):
         return {'FINISHED'}
 
 def get_blend_assets_path():
