@@ -7,34 +7,28 @@ class RYWRANGLER_MT_pie_menu(bpy.types.Menu):
     bl_label = "RyWrangler"
 
     def draw(self, context):
-        layout = self.layout
-        pie = layout.menu_pie()
-        pie.menu("RYWRANGLER_MT_mask_menu")
-        pie.menu("RYWRANGLER_MT_layer_menu")
+        pie = self.layout.menu_pie()
+
+        # Masks
+        row = pie.row(align=True)
+        row.scale_x = 2.0
+        row.scale_y = 2.0
+        row.operator("rywrangler.add_grunge", text="", icon='FORCE_TURBULENCE')
+        row.operator("rywrangler.add_edge_wear", text="", icon='EDGESEL')
+        
+        # Layers
+        row = pie.row(align=True)
+        row.scale_x = 2.0
+        row.scale_y = 2.0
+        row.operator("rywrangler.add_paint_layer", text="", icon='TPAINT_HLT')
+        row.operator("rywrangler.add_uv_layer", text="", icon='UV')
+        row.operator("rywrangler.add_decal_layer", text="", icon='STICKY_UVS_DISABLE')
+        row.operator("rywrangler.add_triplanar_layer", text="", icon='FILE_3D')
+
         pie.operator("rywrangler.auto_link_nodes", text="Auto-Link")
         pie.operator("rywrangler.isolate_node", text="Isolate")
         pie.operator("rywrangler.edit_image_externally", text="Edit Externally")
         pie.operator("rywrangler.import_texture_set", text="Import Texture Set")
-
-class RYWRANGLER_MT_layer_menu(bpy.types.Menu):
-    bl_label = "Add Layer"
-    bl_idname = "RYWRANGLER_MT_layer_menu"
-
-    def draw(self, context):
-        layout = self.layout
-        layout.operator("rywrangler.add_paint_layer", text="Paint")
-        layout.operator("rywrangler.add_uv_layer", text="UV")
-        layout.operator("rywrangler.add_decal_layer", text="Decal")
-        layout.operator("rywrangler.add_triplanar_layer", text="Triplanar")
-
-class RYWRANGLER_MT_mask_menu(bpy.types.Menu):
-    bl_label = "Add Mask"
-    bl_idname = "RYWRANGLER_MT_mask_menu"
-
-    def draw(self, context):
-        layout = self.layout
-        layout.operator("rywrangler.add_grunge", text="Grunge")
-        layout.operator("rywrangler.add_edge_wear", text="Edge Wear")
 
 class RYWRANGLER_OT_open_pie_menu(bpy.types.Operator):
     bl_idname = "wm.call_custom_pie"
