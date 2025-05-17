@@ -84,6 +84,10 @@ MATERIAL_CHANNEL_ABBREVIATIONS = {
     "ao": 'AMBIENT_OCCLUSION'
 }
 
+# ==============================================================
+# Layers
+# ==============================================================
+
 class RYWRANGLER_OT_AddPaintLayer(bpy.types.Operator):
     bl_idname = "rywrangler.add_paint_layer"
     bl_label = "Add Paint Layer"
@@ -143,6 +147,10 @@ class RYWRANGLER_OT_AddTriplanarLayer(Operator):
         add_group_node("Layer_Triplanar")
         return {'FINISHED'}
 
+# ==============================================================
+# Masks
+# ==============================================================
+
 class RYWRANGLER_OT_AddGrunge(Operator):
     bl_idname = "rywrangler.add_grunge"
     bl_label = "Add Grunge"
@@ -162,6 +170,10 @@ class RYWRANGLER_OT_AddEdgeWear(Operator):
     def execute(self, context):
         add_group_node("Mask_EdgeWear")
         return {'FINISHED'}
+
+# ==============================================================
+# Utility Operators
+# ==============================================================
 
 class RYWRANGLER_OT_import_texture_set(Operator, ImportHelper):
     bl_idname = "rywrangler.import_texture_set"
@@ -526,6 +538,10 @@ class RYWRANGLER_OT_edit_image_externally(Operator):
 
     def execute(self, context):
         return {'FINISHED'}
+
+# ==============================================================
+# Helper Functions
+# ==============================================================
 
 def get_blend_assets_path():
     '''Returns the path to the blend file where assets are stored for this add-on.'''
