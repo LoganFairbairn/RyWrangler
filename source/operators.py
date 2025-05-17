@@ -594,18 +594,17 @@ def set_snapping_mode(snapping_mode, snap_on=True):
 
 def add_group_node(group_node_name):
     '''Appends a group node from the asset blend file and adds it to the active material.'''
-
-    # Get the active node tree (e.g., material node tree).
-    node_tree = bpy.context.space_data.edit_tree
-    if not node_tree:
+    active_node_tree = bpy.context.space_data.edit_tree
+    if not active_node_tree:
         return
 
     # Create a new empty node group.
-    group_tree = append_group_node(group_node_name)
+    node_tree = append_group_node(group_node_name)
+    node_tree.name = bpy.context.active_object.active_material.name + "_NewLayer"
 
     # Add a Group Node to the material node editor.
-    group_node = node_tree.nodes.new('ShaderNodeGroup')
-    group_node.node_tree = group_tree
-
-    # Set default location near origin (roughly center of screen view in many cases)
-    group_node.location = (0 - group_node.width / 2, 0)
+    group_node = active_node_tree.nodes.new('ShaderNodeGroup')
+    group_node.node_tree = node_tree
+    group_node.name = node_tree.name
+    group_node.width = 200.0
+    
