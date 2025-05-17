@@ -435,7 +435,7 @@ class RYWRANGLER_OT_import_texture_set(Operator, ImportHelper):
 
         return {'FINISHED'}
 
-class RYWANGLER_OT_AutoLinkNodes(bpy.types.Operator):
+class RYWRANGLER_OT_AutoLinkNodes(bpy.types.Operator):
     bl_idname = "rywrangler.auto_link_nodes"
     bl_label = "Auto Link Nodes"
     bl_description = "Attempts to link two nodes together automatically by referencing their node type, socket names, and socket types"
