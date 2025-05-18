@@ -91,7 +91,7 @@ MATERIAL_CHANNEL_ABBREVIATIONS = {
 class RYWRANGLER_OT_AddPaintLayer(bpy.types.Operator):
     bl_idname = "rywrangler.add_paint_layer"
     bl_label = "Add Paint Layer"
-    bl_description = "Adds an image texture node under the cursor, and a mix node below it if another exists"
+    bl_description = "Adds a default UV layer group node and fills the color channel with a new image"
     bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
@@ -110,7 +110,7 @@ class RYWRANGLER_OT_AddPaintLayer(bpy.types.Operator):
 
 class RYWRANGLER_OT_AddUVLayer(Operator):
     bl_idname = "rywrangler.add_uv_layer"
-    bl_description = "Adds a shader node and a mix shader node"
+    bl_description = "Adds a default UV layer group node"
     bl_label = "Add UV Layer"
     bl_options = {'REGISTER', 'UNDO'}
 
@@ -129,7 +129,7 @@ class RYWRANGLER_OT_AddUVLayer(Operator):
 class RYWRANGLER_OT_AddDecalLayer(Operator):
     bl_idname = "rywrangler.add_decal_layer"
     bl_label = "Add Decal Layer"
-    bl_description = "Adds a node setup that projects the specified texture using the coordinates of an empty object. This is designed for adding non-destructive sticker style layers"
+    bl_description = "Adds a default layer group node setup that projects the specified texture using the coordinates of an empty object. This is designed for adding non-destructive sticker style layers"
     bl_options  = {'REGISTER', 'UNDO'}
 
     @classmethod
@@ -147,7 +147,7 @@ class RYWRANGLER_OT_AddDecalLayer(Operator):
 class RYWRANGLER_OT_AddTriplanarLayer(Operator):
     bl_idname = "rywrangler.add_triplanar_layer"
     bl_label = "Add Triplanar Layer"
-    bl_description = "Adds a node setup that projects specified textures onto the X, Y and Z axis of the object, blending the projection at the seams"
+    bl_description = "Adds a default layer group node setup that projects specified textures onto the X, Y and Z axis of the object, blending the projection at the seams"
     bl_options  = {'REGISTER', 'UNDO'}
 
     @classmethod
