@@ -100,7 +100,7 @@ class RYWRANGLER_OT_AddPaintLayer(bpy.types.Operator):
         return context.space_data.type == 'NODE_EDITOR' and context.space_data.tree_type == 'ShaderNodeTree'
 
     def execute(self, context):
-        add_group_node("Layer_UV")
+        add_layer_node("UV")
 
         # TODO: Add a new image texture into the color image texture node.
         return {'FINISHED'}
@@ -109,22 +109,18 @@ class RYWRANGLER_OT_AddUVLayer(Operator):
     bl_idname = "rywrangler.add_uv_layer"
     bl_description = "Adds a shader node and a mix shader node"
     bl_label = "Add UV Layer"
-    bl_options  = {'REGISTER', 'UNDO'}
-
-    node_type: bpy.props.EnumProperty(
-        name="Shader Node Type",
-        description="Choose a shader node to add",
-        items=SHADER_NODES
-    )
+    bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
     def poll(cls, context):
-        """Ensure the operator is only available in the Shader Node Editor."""
-        return (context.space_data and context.space_data.type == 'NODE_EDITOR' and
-                context.space_data.tree_type == 'ShaderNodeTree')
+        return (
+            context.space_data and
+            context.space_data.type == 'NODE_EDITOR' and
+            context.space_data.tree_type == 'ShaderNodeTree'
+        )
 
     def execute(self, context):
-        add_group_node("Layer_UV")
+        add_layer_node("UV")
         return {'FINISHED'}
 
 class RYWRANGLER_OT_AddDecalLayer(Operator):
@@ -134,7 +130,7 @@ class RYWRANGLER_OT_AddDecalLayer(Operator):
     bl_options  = {'REGISTER', 'UNDO'}
     
     def execute(self, context):
-        add_group_node("Layer_Decal")
+        add_layer_node("Decal")
         return {'FINISHED'}
 
 class RYWRANGLER_OT_AddTriplanarLayer(Operator):
@@ -144,7 +140,7 @@ class RYWRANGLER_OT_AddTriplanarLayer(Operator):
     bl_options  = {'REGISTER', 'UNDO'}
     
     def execute(self, context):
-        add_group_node("Layer_Triplanar")
+        add_layer_node("Triplanar")
         return {'FINISHED'}
 
 # ==============================================================
@@ -627,3 +623,82 @@ def add_group_node(group_node_name):
     group_node.name = node_tree.name
     group_node.width = 200.0
     group_node.location = (pie_menu_location[0] - 100, pie_menu_location[1] + group_node.height)
+    return group_node
+
+def add_layer_node(layer_type):
+    '''Adds a default layer node of the specified type, organizes nodes and connects layers if applicable.'''
+
+    mat = bpy.context.object.active_material
+    if not mat or not mat.use_nodes:
+        return
+
+    nodes = mat.node_tree.nodes
+    links = mat.node_tree.links
+
+    # Find the selected node with a SHADER output
+    selected_node = next(
+        (n for n in nodes if n.select and n.outputs and n.outputs[0].type == 'SHADER'),
+        None
+    )
+
+    # Add the new layer group node based on the specified type
+    layer_group_node = None
+    match layer_type:
+        case "UV":
+            layer_group_node = add_group_node("Layer_UV")
+        case "DECAL":
+            layer_group_node = add_group_node("Layer_Decal")
+        case "TRIPLANAR":
+            layer_group_node = add_group_node("Layer_Triplanar")
+        case _:
+            return
+
+    if not layer_group_node:
+        return
+
+    if not selected_node:
+        # Just add the layer node with no connections
+        return
+
+    # Position new layer node below selected
+    vertical_offset = -300
+    layer_group_node.location = (
+        selected_node.location.x,
+        selected_node.location.y + vertical_offset
+    )
+
+    # Create Mix Shader node to the right and centered vertically
+    mix_shader = nodes.new(type='ShaderNodeMixShader')
+    horizontal_offset = 300
+    mid_y = (selected_node.location.y + layer_group_node.location.y) / 2
+    mix_shader.location = (
+        selected_node.location.x + horizontal_offset,
+        mid_y
+    )
+    mix_shader.inputs[0].default_value = 0.5  # Default blend factor
+
+    # Unlink any connections from selected_node.outputs[0]
+    output_socket = selected_node.outputs[0]
+    for link in list(output_socket.links):
+        links.remove(link)
+
+    # Connect selected node to first shader input
+    links.new(output_socket, mix_shader.inputs[1])
+
+    # Connect new layer node to second shader input
+    links.new(layer_group_node.outputs[0], mix_shader.inputs[2])
+
+    # Reconnect to Material Output (Surface)
+    output_node = next((n for n in nodes if isinstance(n, bpy.types.ShaderNodeOutputMaterial)), None)
+    if output_node:
+        for link in output_node.inputs['Surface'].links:
+            links.remove(link)
+        links.new(mix_shader.outputs[0], output_node.inputs['Surface'])
+
+    # Select original, layer, and mix nodes
+    for n in nodes:
+        n.select = False
+    selected_node.select = True
+    layer_group_node.select = True
+    mix_shader.select = True
+    mat.node_tree.nodes.active = mix_shader
