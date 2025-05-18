@@ -94,10 +94,13 @@ class RYWRANGLER_OT_AddPaintLayer(bpy.types.Operator):
     bl_description = "Adds an image texture node under the cursor, and a mix node below it if another exists"
     bl_options = {'REGISTER', 'UNDO'}
 
-    # Ensure the operator is only ran in the correct context.
     @classmethod
     def poll(cls, context):
-        return context.space_data.type == 'NODE_EDITOR' and context.space_data.tree_type == 'ShaderNodeTree'
+        return (
+            context.space_data and
+            context.space_data.type == 'NODE_EDITOR' and
+            context.space_data.tree_type == 'ShaderNodeTree'
+        )
 
     def execute(self, context):
         add_layer_node("UV")
@@ -128,6 +131,14 @@ class RYWRANGLER_OT_AddDecalLayer(Operator):
     bl_label = "Add Decal Layer"
     bl_description = "Adds a node setup that projects the specified texture using the coordinates of an empty object. This is designed for adding non-destructive sticker style layers"
     bl_options  = {'REGISTER', 'UNDO'}
+
+    @classmethod
+    def poll(cls, context):
+        return (
+            context.space_data and
+            context.space_data.type == 'NODE_EDITOR' and
+            context.space_data.tree_type == 'ShaderNodeTree'
+        )
     
     def execute(self, context):
         add_layer_node("Decal")
@@ -138,7 +149,15 @@ class RYWRANGLER_OT_AddTriplanarLayer(Operator):
     bl_label = "Add Triplanar Layer"
     bl_description = "Adds a node setup that projects specified textures onto the X, Y and Z axis of the object, blending the projection at the seams"
     bl_options  = {'REGISTER', 'UNDO'}
-    
+
+    @classmethod
+    def poll(cls, context):
+        return (
+            context.space_data and
+            context.space_data.type == 'NODE_EDITOR' and
+            context.space_data.tree_type == 'ShaderNodeTree'
+        )
+
     def execute(self, context):
         add_layer_node("Triplanar")
         return {'FINISHED'}
